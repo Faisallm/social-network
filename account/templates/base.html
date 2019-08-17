@@ -1,0 +1,83 @@
+{% load staticfiles %}
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+        <title>{% block title %}{% endblock %}</title>
+        <link rel='stylesheet' href='{% static "css/base.css" %}'>
+    </head>
+    <body>
+        <div id='header'>
+            <span class='logo'>Bookmarks</span>
+            {% if request.user.is_authenticated %}
+                <ul class='menu'>
+                    <li {% if section == "dashboard" %}class='selected'{% endif %}>
+                        <a href='{% url "account:dashboard" %}'>
+                            dashboard
+                        </a>
+                    </li>
+                    <li {% if section == "images" %}class='selected'{% endif %}>
+                        <a href='{% url "images:list" %}'>
+                            Images
+                        </a>
+                    </li>
+                    <li {% if section == "people" %}class='selected'{% endif %}>
+                        <a href='#'>
+                            People
+                        </a>
+                    </li>
+                </ul>
+            {% endif %}
+
+            <span class='user'>
+                {% if request.user.is_authenticated %}
+                    Hello {{ request.user.first_name }}
+                    <a href='{% url "account:logout" %}'>logout</a>
+                {% else %}
+                    <a href='{% url "account:login" %}'>login</a>
+                {% endif %}
+            </span>
+        </div>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">
+                        {{ message|safe }}
+                        <a href="#" class="close">✖</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div id='content'>
+            {% block content %}
+            {% endblock %}
+        </div>
+
+    <script src='{% static "js/jquery.js" %}'></script>
+    <script src='{% static "js/jquery.cookie.js" %}'></script>
+    <script>
+     //csrf_token setup for ajax
+         var csrftoken = $.cookie('csrftoken');
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+        $.ajaxSetup({
+             beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+         }
+        });
+
+        $(document).ready(function(){
+            {% block domready %}
+            {% endblock %}
+        });
+    </script>
+
+    </body>
+
+</html>

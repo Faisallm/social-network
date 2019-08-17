@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Images bookmarked{% endblock %}
+
+{% block content %}
+    <h1>Images bookmarked</h1>
+    <div id='image-list'>
+        {% include "images/image/list_ajax.html" %}
+    </div>
+{% endblock %}
+
+{% block domready %}
+    var page = 1;
+    var empty_page = false;  // prevent us from sending additional ajax 
+    //request when we reach the end of a page
+    var block_request = false;
+
+    $(window).scroll(function() {
+        var margin = $(document).height() - $(window).height() - 200;
+        if($(window).scrollTop() > margin && block_request == false && empty_page == false){
+            block_request = true; 
+            // prevent us from sending addtional request in the process of processing a request
+            page++;
+            $.get('?page='+page,
+            function(data) {
+                if(data == '') {
+                    //i.e HttpResponse('')
+                    empty_page = true;  //stop sending additional requests
+                }
+                else {
+                    block_request = false;
+                    $('#image-list').append(data);  //append data to bottom of page.
+                }
+            })
+        }
+    })
+{% endblock %}
